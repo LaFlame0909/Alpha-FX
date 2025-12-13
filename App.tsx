@@ -6,7 +6,7 @@ import { Accounting } from './components/Accounting';
 import { Resources } from './components/AICoach';
 import { TradeModal } from './components/TradeModal';
 import { AppState, Trade } from './types';
-import { getStoredData, addTrade, deleteTrade, updateTrade, calculateKPIs } from './services/storage';
+import { getStoredData, addTrade, deleteTrade, updateTrade } from './services/storage';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'log' | 'accounting' | 'resources'>('dashboard');
@@ -71,9 +71,6 @@ const App = () => {
       setIsModalOpen(false);
       setEditingTrade(null);
   };
-
-  // Calculate current balance for the calculator
-  const stats = calculateKPIs(data);
 
   const NavButton = ({ tab, label, icon: Icon }: any) => (
     <button
