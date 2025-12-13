@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlphaOne | Forex Journal & AI Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              bb: {
+                bg: 'var(--color-bg)',
+                card: 'var(--color-card)',
+                accent: 'var(--color-accent)',
+                success: '#10b981',
+                danger: '#ef4444',
+                text: 'var(--color-text)',
+                muted: 'var(--color-muted)',
+                border: 'var(--color-border)'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --color-bg: #f8fafc;        /* Slate 50 */
+        --color-card: #ffffff;      /* White */
+        --color-accent: #4f46e5;    /* Indigo 600 */
+        --color-text: #0f172a;      /* Slate 900 */
+        --color-muted: #64748b;     /* Slate 500 */
+        --color-border: #e2e8f0;    /* Slate 200 */
+      }
+      .dark {
+        --color-bg: #0f172a;        /* Slate 900 */
+        --color-card: #1e293b;      /* Slate 800 */
+        --color-accent: #6366f1;    /* Indigo 500 */
+        --color-text: #f1f5f9;      /* Slate 50 */
+        --color-muted: #94a3b8;     /* Slate 400 */
+        --color-border: #334155;    /* Slate 700 */
+      }
+      
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+        "recharts": "https://esm.sh/recharts@^2.12.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+        "react-markdown": "https://esm.sh/react-markdown@9.0.1"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-bb-bg text-bb-text h-screen overflow-hidden selection:bg-bb-accent/30 transition-colors duration-300">
+    <div id="root" class="relative z-10 h-full"></div>
+    <script>
+      // Initialize Theme
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+  </body>
+</html>
