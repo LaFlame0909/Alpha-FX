@@ -1,27 +1,48 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --color-bg: #f8fafc;        /* Slate 50 */
   --color-card: #ffffff;      /* White */
   --color-accent: #4f46e5;    /* Indigo 600 */
+  --color-accent-rgb: 79, 70, 229;
   --color-text: #0f172a;      /* Slate 900 */
   --color-muted: #64748b;     /* Slate 500 */
   --color-border: #e2e8f0;    /* Slate 200 */
 }
 
 .dark {
-  --color-bg: #0f172a;        /* Slate 900 */
-  --color-card: #1e293b;      /* Slate 800 */
+  --color-bg: #020617;        /* Slate 950 - Deeper background */
+  --color-card: #0f172a;      /* Slate 900 - Darker card */
   --color-accent: #6366f1;    /* Indigo 500 */
-  --color-text: #f1f5f9;      /* Slate 50 */
+  --color-accent-rgb: 99, 102, 241;
+  --color-text: #f8fafc;      /* Slate 50 */
   --color-muted: #94a3b8;     /* Slate 400 */
-  --color-border: #334155;    /* Slate 700 */
+  --color-border: #1e293b;    /* Slate 800 */
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
 
 /* Markdown Styles */
-.markdown-content ul { list-style-type: disc; padding-left: 1rem; }
-.markdown-content li { margin-bottom: 0.25rem; }
+.markdown-content ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 1rem; }
+.markdown-content li { margin-bottom: 0.5rem; }
+.markdown-content p { margin-bottom: 0.75rem; }
+.markdown-content strong { color: var(--color-accent); font-weight: 600; }
+
+/* Utilities */
+.glass-panel {
+    background: linear-gradient(145deg, rgba(var(--color-card), 0.6) 0%, rgba(var(--color-card), 0.3) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+}

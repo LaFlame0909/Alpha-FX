@@ -8,6 +8,8 @@ export interface Trade {
     pl: number;
     notes: string;
     image?: string; // Base64
+    score?: number; // 0-100
+    checklist?: string[]; // IDs of checked items
   }
   
   export interface Transaction {
@@ -23,12 +25,6 @@ export interface Trade {
     balance: number;
   }
   
-  export interface ChatMessage {
-    role: 'user' | 'model';
-    text: string;
-    isLoading?: boolean;
-  }
-  
   export interface KPI {
     balance: number;
     netPL: number;
@@ -38,10 +34,7 @@ export interface Trade {
     avgHold: string; // Placeholder for simplicity
   }
   
-  export enum AI_MODE {
-    CHAT = 'chat',
-    VISION = 'vision',
-    PSYCHO = 'psycho',
-    NEWS = 'news',
-    PATTERNS = 'patterns'
+  export enum RESOURCE_MODE {
+    PATTERNS = 'patterns',
+    SESSIONS = 'sessions'
   }

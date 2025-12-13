@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trade } from '../types';
-import { Trash2, Image as ImageIcon, Plus, Edit2 } from 'lucide-react';
+import { Trash2, Image as ImageIcon, Plus, Edit2, Info } from 'lucide-react';
 
 interface TradeLogProps {
   trades: Trade[];
@@ -46,6 +46,25 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
                 <th className="p-4 font-semibold uppercase tracking-wider text-right">Risk ($)</th>
                 <th className="p-4 font-semibold uppercase tracking-wider text-right">P/L ($)</th>
                 <th className="p-4 font-semibold uppercase tracking-wider text-right">R-Mult</th>
+                <th className="p-4 font-semibold uppercase tracking-wider text-center">
+                    <div className="flex items-center justify-center gap-1 group relative">
+                        Quality
+                        <Info size={14} className="text-bb-muted hover:text-bb-accent cursor-help transition-colors" />
+                        
+                        <div className="absolute top-full right-1/2 translate-x-1/2 mt-2 w-56 bg-bb-card border border-bb-border shadow-2xl rounded-xl p-4 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50 text-left pointer-events-none transform origin-top">
+                            <div className="text-[10px] font-bold text-bb-muted uppercase mb-2 border-b border-bb-border pb-2">Score Criteria</div>
+                            <ul className="text-[10px] text-bb-text space-y-1.5 list-disc pl-3 leading-tight font-medium">
+                                <li>Trend Alignment</li>
+                                <li>Key Support/Resistance</li>
+                                <li>Valid Entry Signal</li>
+                                <li>Stop Loss Structure</li>
+                                <li>Risk-to-Reward (1:2+)</li>
+                                <li>No News Events</li>
+                                <li>Calm Mental State</li>
+                            </ul>
+                        </div>
+                    </div>
+                </th>
                 <th className="p-4 font-semibold uppercase tracking-wider text-center">Chart</th>
                 <th className="p-4 font-semibold uppercase tracking-wider text-right">Actions</th>
               </tr>
@@ -53,7 +72,7 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
             <tbody className="text-sm divide-y divide-bb-border">
               {trades.length === 0 ? (
                   <tr>
-                      <td colSpan={9} className="p-12 text-center text-bb-muted">
+                      <td colSpan={10} className="p-12 text-center text-bb-muted">
                         <div className="flex flex-col items-center gap-2 opacity-60">
                             <span className="text-lg">No trades logged yet</span>
                             <span className="text-xs">Click "Log Trade" to start tracking your journey.</span>
@@ -63,6 +82,12 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
               ) : (
                   trades.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(t => {
                     const r = t.risk > 0 ? (t.pl / t.risk).toFixed(2) : '0.00';
+                    const score = t.score ?? 0;
+                    let scoreColor = 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+                    if (score >= 80) scoreColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+                    else if (score >= 50) scoreColor = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+                    else if (score > 0) scoreColor = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+
                     return (
                         <tr key={t.id} className="hover:bg-bb-bg/50 transition group">
                         <td className="p-4 text-xs text-bb-muted whitespace-nowrap">
@@ -81,6 +106,13 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
                             {t.pl >= 0 ? '+' : ''}{t.pl}
                         </td>
                         <td className="p-4 text-right font-mono text-xs text-bb-muted">{r}R</td>
+                        <td className="p-4 text-center">
+                            {t.score !== undefined ? (
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${scoreColor}`}>
+                                    {t.score}%
+                                </span>
+                            ) : <span className="text-bb-muted text-xs">-</span>}
+                        </td>
                         <td className="p-4 text-center">
                             {t.image ? (
                                 <button onClick={() => setViewImage(t.image!)} className="text-bb-accent hover:text-bb-text transition">

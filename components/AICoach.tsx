@@ -1,30 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { AI_MODE, Trade } from '../types';
-import { MessageSquare, Eye, Brain, Globe, Send, Loader2, ImagePlus, CandlestickChart, Trash2 } from 'lucide-react';
-import { chatWithCoach, analyzeTradeImage, analyzePsychology, getMarketBriefing } from '../services/gemini';
-import ReactMarkdown from 'react-markdown';
+import React, { useState, useEffect } from 'react';
+import { RESOURCE_MODE } from '../types';
+import { CandlestickChart, Clock, PlayCircle, Globe, Sun, Moon, MapPin } from 'lucide-react';
 
-interface AICoachProps {
-    trades: Trade[];
-}
-
-interface Message {
-    role: 'user' | 'ai';
-    content: string;
-    type?: 'text' | 'image';
+interface ResourcesProps {
+    currentBalance: number;
 }
 
 const PatternCard = ({ name, type, desc, children }: { name: string, type: string, desc: string, children?: React.ReactNode }) => (
-    <div className="bg-bb-card border border-bb-border rounded-xl p-4 flex flex-col gap-3 hover:border-bb-accent/50 transition group h-full shadow-sm">
-        <div className="h-28 bg-bb-bg rounded-lg flex items-center justify-center border border-bb-border relative overflow-hidden group-hover:bg-bb-bg/50 transition-colors">
+    <div className="bg-bb-card border border-bb-border rounded-2xl p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-xl hover:border-bb-accent/40 transition-all duration-300 group h-full">
+        <div className="h-32 bg-bb-bg rounded-xl flex items-center justify-center border border-bb-border relative overflow-hidden group-hover:bg-bb-bg/80 transition-colors">
             {children}
         </div>
         <div>
             <div className="flex justify-between items-start mb-2">
-                <h4 className="font-bold text-bb-text text-sm">{name}</h4>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ${
-                    type.includes('Bullish') ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 
-                    (type.includes('Bearish') ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-gray-500/10 text-gray-500 border border-gray-500/20')
+                <h4 className="font-bold text-bb-text text-sm group-hover:text-bb-accent transition-colors">{name}</h4>
+                <span className={`text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wide ${
+                    type.includes('Bullish') ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 
+                    (type.includes('Bearish') ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-gray-500/10 text-gray-500 border border-gray-500/20')
                 }`}>
                     {type.split(' ')[0]}
                 </span>
@@ -34,120 +26,224 @@ const PatternCard = ({ name, type, desc, children }: { name: string, type: strin
     </div>
 );
 
-// Improved Candle Component for accurate wick/body rendering
 const Candle = ({ type = 'bullish', bodyHeight = 'h-8', topWick = 'h-2', bottomWick = 'h-2', className = '' }: { type?: 'bullish' | 'bearish' | 'neutral', bodyHeight?: string, topWick?: string, bottomWick?: string, className?: string }) => {
-    const bg = type === 'bullish' ? 'bg-green-500' : (type === 'bearish' ? 'bg-red-500' : 'bg-gray-400');
-    const border = type === 'bullish' ? 'border-green-600' : (type === 'bearish' ? 'border-red-600' : 'border-gray-500');
-    const wickColor = 'bg-gray-500';
+    const bg = type === 'bullish' ? 'bg-emerald-500' : (type === 'bearish' ? 'bg-rose-500' : 'bg-gray-400');
+    const border = type === 'bullish' ? 'border-emerald-600' : (type === 'bearish' ? 'border-rose-600' : 'border-gray-500');
+    const wickColor = 'bg-bb-muted';
 
     return (
         <div className={`flex flex-col items-center ${className}`}>
-            <div className={`w-[1px] ${wickColor} ${topWick}`}></div>
-            <div className={`w-3 ${bodyHeight} ${bg} border ${border} z-10 ${type === 'neutral' ? 'h-[1px] border-none' : ''}`}></div>
-            <div className={`w-[1px] ${wickColor} ${bottomWick}`}></div>
+            <div className={`w-[2px] ${wickColor} ${topWick}`}></div>
+            <div className={`w-4 ${bodyHeight} ${bg} border ${border} z-10 ${type === 'neutral' ? 'h-[2px] border-none' : 'rounded-[1px]'}`}></div>
+            <div className={`w-[2px] ${wickColor} ${bottomWick}`}></div>
         </div>
     );
 };
 
-export const AICoach: React.FC<AICoachProps> = ({ trades }) => {
-    const [mode, setMode] = useState<AI_MODE>(AI_MODE.CHAT);
-    
-    // Separate history state for each mode
-    const [histories, setHistories] = useState<Record<string, Message[]>>({
-        [AI_MODE.CHAT]: [{ role: 'ai', content: "Hello! I'm AlphaOne. Ask me anything about your trading data and performance." }],
-        [AI_MODE.VISION]: [{ role: 'ai', content: "Upload a chart screenshot or describe a market setup, and I'll analyze the price action." }],
-        [AI_MODE.PSYCHO]: [{ role: 'ai', content: "Journal your thoughts here. I'll analyze your psychology, look for bias, and offer mindset advice." }],
-        [AI_MODE.NEWS]: [{ role: 'ai', content: "Click 'Market Briefing' to get the latest high-impact news and analysis for today." }],
-        [AI_MODE.PATTERNS]: [] // Static view
+const Sessions = () => {
+    // Base UTC Config
+    const sessions = [
+        { name: "Sydney", city: "Sydney", start: 22, end: 7, color: "bg-amber-500", icon: Sun },
+        { name: "Tokyo", city: "Tokyo", start: 0, end: 9, color: "bg-rose-500", icon: Moon },
+        { name: "London", city: "London", start: 8, end: 17, color: "bg-indigo-500", icon: Globe },
+        { name: "New York", city: "New York", start: 13, end: 22, color: "bg-emerald-500", icon: MapPin },
+    ];
+
+    // Persist timezone in localStorage
+    const [timezone, setTimezone] = useState<'UTC' | 'IST' | 'EST' | 'Local'>(() => {
+        return (localStorage.getItem('market_session_timezone') as any) || 'UTC';
     });
+    
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        localStorage.setItem('market_session_timezone', timezone);
+    }, [timezone]);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 10000); // Update every 10s
+        return () => clearInterval(timer);
+    }, []);
 
-    useEffect(scrollToBottom, [histories[mode], mode]);
-
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => setSelectedImage(ev.target?.result as string);
-            reader.readAsDataURL(file);
+    // Timezone Offsets (hours relative to UTC)
+    const getOffset = () => {
+        switch(timezone) {
+            case 'IST': return 5.5;
+            case 'EST': return -5;
+            case 'Local': return -new Date().getTimezoneOffset() / 60;
+            default: return 0; // UTC
         }
     };
 
-    const clearHistory = () => {
-        if(window.confirm("Clear chat history for this module?")) {
-             setHistories(prev => ({
-                 ...prev,
-                 [mode]: []
-             }));
-        }
+    const offset = getOffset();
+
+    // Current Hour in Selected Timezone (0-24 scale)
+    const utcHour = currentTime.getUTCHours() + currentTime.getUTCMinutes() / 60;
+    let displayHour = (utcHour + offset) % 24;
+    if (displayHour < 0) displayHour += 24;
+
+    const displayTimeStr = new Date(currentTime.getTime() + offset * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+
+    // Helper to calculate session display range
+    const getDisplayRange = (start: number, end: number) => {
+        let s = (start + offset) % 24;
+        let e = (end + offset) % 24;
+        if (s < 0) s += 24;
+        if (e < 0) e += 24;
+        return { start: s, end: e };
     };
 
-    const handleSubmit = async () => {
-        if ((!input.trim() && !selectedImage && mode !== AI_MODE.NEWS) || isLoading) return;
-
-        const userMsg = input;
-        const currentHistory = histories[mode] || [];
-
-        const newHistory = [...currentHistory, { role: 'user', content: userMsg || (selectedImage ? "[Image Uploaded]" : "Requesting...") } as Message];
-        setHistories(prev => ({ ...prev, [mode]: newHistory }));
-        
-        setInput('');
-        setIsLoading(true);
-
-        let responseText = '';
-
-        try {
-            switch (mode) {
-                case AI_MODE.CHAT:
-                    responseText = await chatWithCoach(userMsg, trades);
-                    break;
-                case AI_MODE.VISION:
-                    if (selectedImage) {
-                        responseText = await analyzeTradeImage(selectedImage);
-                        setSelectedImage(null);
-                    } else {
-                        responseText = await chatWithCoach("Analyze this setup description: " + userMsg, trades);
-                    }
-                    break;
-                case AI_MODE.PSYCHO:
-                    responseText = await analyzePsychology(userMsg, trades);
-                    break;
-                case AI_MODE.NEWS:
-                    responseText = await getMarketBriefing();
-                    break;
-            }
-        } catch (error) {
-            responseText = "Sorry, I encountered an error processing your request.";
-        }
-
-        setHistories(prev => ({
-            ...prev,
-            [mode]: [...prev[mode], { role: 'ai', content: responseText }]
-        }));
-        setIsLoading(false);
+    const isActive = (start: number, end: number) => {
+        // Active check uses pure UTC to be accurate regardless of display shift
+        if (start < end) return utcHour >= start && utcHour < end;
+        return utcHour >= start || utcHour < end; 
     };
 
-    const setPrompt = (m: AI_MODE) => {
-        setMode(m);
-    };
+    const activeSessions = sessions.filter(s => isActive(s.start, s.end));
 
-    const activeMessages = histories[mode] || [];
+    return (
+        <div className="flex flex-col h-full space-y-6">
+            {/* Top Status Bar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-bb-card p-6 rounded-3xl border border-bb-border shadow-sm">
+                <div>
+                    <h3 className="text-xl font-bold text-bb-text flex items-center gap-2">
+                        <Globe size={20} className="text-bb-accent" />
+                        Global Market Clock
+                    </h3>
+                    <p className="text-xs text-bb-muted mt-1">Forex Sessions Timeline</p>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                    {/* Timezone Switcher */}
+                    <div>
+                        <div className="text-xs font-bold text-bb-muted uppercase tracking-wider mb-1">Timezone</div>
+                        <select 
+                            value={timezone} 
+                            onChange={(e) => setTimezone(e.target.value as any)}
+                            className="bg-bb-bg border border-bb-border text-bb-text text-sm rounded-lg p-1.5 focus:border-bb-accent outline-none font-bold"
+                        >
+                            <option value="UTC">UTC (GMT)</option>
+                            <option value="IST">IST (UTC+5:30)</option>
+                            <option value="EST">EST (New York)</option>
+                            <option value="Local">My Local Time</option>
+                        </select>
+                    </div>
+
+                    <div className="h-10 w-px bg-bb-border"></div>
+
+                    <div className="text-right">
+                        <div className="text-xs font-bold text-bb-muted uppercase tracking-wider">Current Time</div>
+                        <div className="text-2xl font-mono font-bold text-bb-text">{displayTimeStr}</div>
+                    </div>
+                    
+                    <div className="hidden md:block">
+                        <div className="text-xs font-bold text-bb-muted uppercase tracking-wider mb-1">Active Now</div>
+                        <div className="flex gap-2">
+                            {activeSessions.length > 0 ? (
+                                activeSessions.map(s => (
+                                    <span key={s.name} className={`text-xs font-bold px-2 py-1 rounded-md text-white ${s.color}`}>
+                                        {s.name}
+                                    </span>
+                                ))
+                            ) : (
+                                <span className="text-xs font-bold px-2 py-1 rounded-md bg-gray-500 text-white">Quiet Hours</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Timeline Chart */}
+            <div className="flex-1 bg-bb-card p-8 rounded-3xl border border-bb-border shadow-sm relative overflow-hidden flex flex-col justify-center">
+                 {/* Current Time Line (Vertical) */}
+                 <div 
+                    className="absolute top-12 bottom-12 w-0.5 bg-red-500/80 z-20 pointer-events-none transition-all duration-1000 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                    style={{ left: `${(displayHour / 24) * 100}%` }}
+                >
+                    <div className="absolute -top-3 -translate-x-1/2">
+                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-red-500"></div>
+                    </div>
+                    <div className="absolute -bottom-3 -translate-x-1/2">
+                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-red-500"></div>
+                    </div>
+                </div>
+
+                {/* X-Axis Labels */}
+                <div className="absolute top-4 left-0 right-0 flex justify-between px-0 text-[10px] font-mono text-bb-muted font-bold uppercase">
+                    {Array.from({length: 13}).map((_, i) => (
+                        <span key={i} style={{ left: `${(i * 2 / 24) * 100}%`, position: 'absolute' }}>
+                            {i * 2}:00
+                        </span>
+                    ))}
+                </div>
+
+                {/* Grid Background */}
+                <div className="absolute inset-0 mx-0 grid grid-cols-24 pointer-events-none">
+                    {Array.from({length: 24}).map((_, i) => (
+                        <div key={i} className={`border-r border-bb-border/20 h-full ${i % 4 === 0 ? 'border-bb-border/40' : ''}`}></div>
+                    ))}
+                </div>
+
+                {/* Session Bars */}
+                <div className="space-y-8 relative z-10 mt-6">
+                    {sessions.map((s) => {
+                         const { start, end } = getDisplayRange(s.start, s.end);
+                         const isWrapped = end < start;
+                         const active = isActive(s.start, s.end);
+                         
+                         return (
+                            <div key={s.name} className="relative h-12">
+                                {/* Label */}
+                                <div className="absolute -top-6 left-0 flex items-center gap-2">
+                                    <s.icon size={14} className={active ? 'text-bb-text' : 'text-bb-muted'} />
+                                    <span className={`text-xs font-bold ${active ? 'text-bb-text' : 'text-bb-muted'}`}>{s.name}</span>
+                                </div>
+
+                                {/* Bar Track */}
+                                <div className="absolute inset-x-0 h-3 top-2 bg-bb-bg rounded-full"></div>
+
+                                {/* Active Bar Segment(s) */}
+                                {!isWrapped ? (
+                                    <div 
+                                        className={`absolute h-3 top-2 rounded-full ${s.color} ${active ? 'opacity-100 shadow-lg' : 'opacity-40'} transition-all duration-500`}
+                                        style={{ left: `${(start/24)*100}%`, width: `${((end - start)/24)*100}%` }}
+                                    ></div>
+                                ) : (
+                                    <>
+                                        <div 
+                                            className={`absolute h-3 top-2 rounded-l-full ${s.color} ${active ? 'opacity-100 shadow-lg' : 'opacity-40'} transition-all duration-500`}
+                                            style={{ left: `${(start/24)*100}%`, right: 0 }}
+                                        ></div>
+                                        <div 
+                                            className={`absolute h-3 top-2 rounded-r-full ${s.color} ${active ? 'opacity-100 shadow-lg' : 'opacity-40'} transition-all duration-500`}
+                                            style={{ left: 0, width: `${(end/24)*100}%` }}
+                                        ></div>
+                                    </>
+                                )}
+                            </div>
+                         );
+                    })}
+                </div>
+
+                {/* Bottom Overlap Indicators */}
+                <div className="mt-8 flex justify-center gap-4">
+                     <span className="text-xs text-bb-muted italic">Timezone adjusted: {timezone}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const Resources: React.FC<ResourcesProps> = ({ currentBalance }) => {
+    const [mode, setMode] = useState<RESOURCE_MODE>(RESOURCE_MODE.PATTERNS);
 
     const ModeButton = ({ m, label, icon: Icon }: any) => (
         <button 
-            onClick={() => { setPrompt(m); if(m === AI_MODE.NEWS && activeMessages.length <= 1) setTimeout(() => handleSubmit(), 100); }} 
-            className={`text-left p-3 rounded-xl transition-all text-sm flex items-center gap-3 border ${
+            onClick={() => setMode(m)} 
+            className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 text-sm flex items-center gap-3 border mb-2 ${
                 mode === m 
-                ? 'bg-bb-accent text-white shadow-md border-bb-accent' 
-                : 'bg-bb-bg text-bb-muted hover:bg-bb-bg/80 hover:text-bb-text border-transparent'
+                ? 'bg-bb-accent text-white shadow-lg shadow-bb-accent/25 border-bb-accent' 
+                : 'bg-bb-card text-bb-muted hover:bg-bb-bg hover:text-bb-text border-transparent'
             }`}
         >
             <Icon size={18} /> 
@@ -156,51 +252,36 @@ export const AICoach: React.FC<AICoachProps> = ({ trades }) => {
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full overflow-hidden pb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full overflow-hidden pb-4">
             {/* Sidebar */}
-            <div className="bg-bb-card p-4 rounded-2xl border border-bb-border flex flex-col gap-2 h-full shadow-sm">
-                <h3 className="text-xs font-bold text-bb-muted mb-2 uppercase tracking-wider px-2">AI Modules</h3>
+            <div className="bg-bb-card p-6 rounded-3xl border border-bb-border flex flex-col h-full shadow-sm">
+                <div className="flex items-center gap-2 mb-6 px-2">
+                    <PlayCircle className="text-bb-accent" size={24} />
+                    <h3 className="font-bold text-lg text-bb-text">Resources</h3>
+                </div>
                 
-                <ModeButton m={AI_MODE.CHAT} label="Ask Journal (RAG)" icon={MessageSquare} />
-                <ModeButton m={AI_MODE.VISION} label="Chart Analyst" icon={Eye} />
-                <ModeButton m={AI_MODE.PSYCHO} label="Psycho-Analysis" icon={Brain} />
-                <ModeButton m={AI_MODE.NEWS} label="Market Briefing" icon={Globe} />
-
-                <div className="my-2 border-t border-bb-border"></div>
-
-                <ModeButton m={AI_MODE.PATTERNS} label="Patterns Reference" icon={CandlestickChart} />
-
-                {mode === AI_MODE.VISION && (
-                    <div className="mt-auto pt-4 border-t border-bb-border">
-                         <label className="block text-xs text-bb-muted mb-2 font-bold">Upload Chart</label>
-                         <div className="relative group cursor-pointer bg-bb-bg border border-bb-border border-dashed rounded-xl p-4 text-center hover:bg-bb-bg/50 transition">
-                             <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                             {selectedImage ? (
-                                 <div className="text-green-500 text-xs flex flex-col items-center">
-                                     <ImagePlus size={20} className="mb-1" />
-                                     Image Loaded
-                                 </div>
-                             ) : (
-                                 <div className="text-bb-muted flex flex-col items-center">
-                                     <ImagePlus className="mb-1 group-hover:text-bb-text transition-colors" size={20} />
-                                     <span className="text-xs">Click to upload</span>
-                                 </div>
-                             )}
-                         </div>
-                    </div>
-                )}
+                <h4 className="text-[10px] font-bold text-bb-muted mb-3 uppercase tracking-widest px-2">Tools</h4>
+                
+                <ModeButton m={RESOURCE_MODE.PATTERNS} label="Pattern Library" icon={CandlestickChart} />
+                <ModeButton m={RESOURCE_MODE.SESSIONS} label="Market Sessions" icon={Clock} />
             </div>
 
             {/* Content Area */}
-            <div className="lg:col-span-3 bg-bb-card rounded-2xl border border-bb-border flex flex-col overflow-hidden shadow-sm">
-                
-                {mode === AI_MODE.PATTERNS ? (
-                    <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-bb-bg/30">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-bb-text mb-1">Candlestick Patterns</h2>
-                            <p className="text-bb-muted text-sm">Essential price action signals for reversals and continuation.</p>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="lg:col-span-3 flex flex-col overflow-hidden h-full">
+                {/* Header */}
+                <div className="mb-4 flex items-center justify-between">
+                     <h2 className="text-2xl font-bold text-bb-text tracking-tight flex items-center gap-3">
+                        {mode === RESOURCE_MODE.PATTERNS && <><CandlestickChart className="text-bb-accent"/> Candlestick Patterns</>}
+                        {mode === RESOURCE_MODE.SESSIONS && <><Clock className="text-bb-accent"/> Market Sessions</>}
+                     </h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto custom-scrollbar pb-6">
+                    
+                    {mode === RESOURCE_MODE.SESSIONS && <Sessions />}
+
+                    {mode === RESOURCE_MODE.PATTERNS && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                             {/* Reversals */}
                             <PatternCard name="Hammer" type="Bullish Reversal" desc="Found at bottom of downtrend. Small body, little to no upper wick, long lower wick (2x body). Buyers rejected lower prices.">
                                 <Candle type="bullish" bodyHeight="h-3" topWick="h-0" bottomWick="h-12" />
@@ -271,91 +352,8 @@ export const AICoach: React.FC<AICoachProps> = ({ trades }) => {
                                 </div>
                             </PatternCard>
                         </div>
-                    </div>
-                ) : (
-                    <>
-                        <div className="flex items-center justify-between p-4 border-b border-bb-border bg-bb-bg/50 backdrop-blur-sm">
-                            <span className="text-xs font-bold text-bb-muted uppercase tracking-wider flex items-center gap-2">
-                                {mode === AI_MODE.CHAT && <MessageSquare size={14} />}
-                                {mode === AI_MODE.VISION && <Eye size={14} />}
-                                {mode === AI_MODE.PSYCHO && <Brain size={14} />}
-                                {mode === AI_MODE.NEWS && <Globe size={14} />}
-                                {mode} SESSION
-                            </span>
-                            {activeMessages.length > 0 && (
-                                <button onClick={clearHistory} className="text-bb-muted hover:text-red-500 transition" title="Clear History">
-                                    <Trash2 size={14} />
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-bb-bg/30">
-                            {activeMessages.length === 0 && (
-                                <div className="h-full flex flex-col items-center justify-center text-bb-muted opacity-50">
-                                    <Brain size={48} className="mb-4 text-bb-accent" />
-                                    <p>Start a new conversation</p>
-                                </div>
-                            )}
-                            {activeMessages.map((msg, i) => (
-                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
-                                        msg.role === 'user' 
-                                        ? 'bg-bb-accent text-white rounded-tr-sm' 
-                                        : 'bg-bb-card text-bb-text rounded-tl-sm border border-bb-border'
-                                    }`}>
-                                        {msg.role === 'ai' && <div className="flex items-center gap-2 mb-2 text-bb-accent font-bold text-xs uppercase"><Brain size={12} /> Coach</div>}
-                                        {msg.role === 'ai' ? (
-                                            <div className="markdown-content">
-                                                <ReactMarkdown 
-                                                    components={{
-                                                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                                        strong: ({node, ...props}) => <strong className="text-bb-accent font-bold" {...props} />,
-                                                        h3: ({node, ...props}) => <h3 className="text-sm font-bold text-bb-text mt-3 mb-1 uppercase" {...props} />
-                                                    }}
-                                                >
-                                                    {msg.content}
-                                                </ReactMarkdown>
-                                            </div>
-                                        ) : (
-                                            <div className="whitespace-pre-wrap">{msg.content}</div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                            {isLoading && (
-                                <div className="flex justify-start">
-                                    <div className="bg-bb-card rounded-2xl px-5 py-3 rounded-tl-sm border border-bb-border flex items-center gap-2">
-                                        <Loader2 size={16} className="animate-spin text-bb-accent" />
-                                        <span className="text-xs text-bb-muted">Thinking...</span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        <div className="p-4 bg-bb-card border-t border-bb-border">
-                            <div className="flex gap-2 relative">
-                                <textarea 
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-                                    rows={1}
-                                    disabled={mode === AI_MODE.NEWS}
-                                    className="flex-1 bg-bb-bg border border-bb-border rounded-xl px-4 py-3 text-sm text-bb-text focus:border-bb-accent outline-none resize-none disabled:opacity-50 transition-all focus:bg-bb-bg/80 placeholder:text-bb-muted"
-                                    placeholder={mode === AI_MODE.NEWS ? "Click module to generate briefing..." : "Type your message here..."}
-                                />
-                                <button 
-                                    onClick={handleSubmit} 
-                                    disabled={isLoading || (mode === AI_MODE.NEWS && isLoading)}
-                                    className="bg-bb-accent hover:bg-bb-accent/80 disabled:opacity-50 text-white px-4 rounded-xl transition flex items-center justify-center shadow-lg shadow-bb-accent/20"
-                                >
-                                    <Send size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
