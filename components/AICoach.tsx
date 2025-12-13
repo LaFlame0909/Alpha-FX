@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RESOURCE_MODE } from '../types';
 import { CandlestickChart, Clock, PlayCircle, Globe, Sun, Moon, MapPin } from 'lucide-react';
 
-interface ResourcesProps {
-    currentBalance: number;
-}
+interface ResourcesProps {}
 
 const PatternCard = ({ name, type, desc, children }: { name: string, type: string, desc: string, children?: React.ReactNode }) => (
     <div className="bg-bb-card border border-bb-border rounded-2xl p-5 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-xl hover:border-bb-accent/40 transition-all duration-300 group h-full">
@@ -234,7 +232,7 @@ const Sessions = () => {
     );
 };
 
-export const Resources: React.FC<ResourcesProps> = ({ currentBalance }) => {
+export const Resources: React.FC<ResourcesProps> = () => {
     const [mode, setMode] = useState<RESOURCE_MODE>(RESOURCE_MODE.PATTERNS);
 
     const ModeButton = ({ m, label, icon: Icon }: any) => (

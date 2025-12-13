@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
 import { AppState, KPI, Trade } from '../types';
 import { calculateKPIs } from '../services/storage';
-import { Wallet, TrendingUp, Activity, Scale, ArrowUpRight, ArrowDownRight, DollarSign, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Percent, MoreHorizontal } from 'lucide-react';
+import { Wallet, TrendingUp, Activity, Scale, ArrowUpRight, ArrowDownRight, DollarSign, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Percent } from 'lucide-react';
 
 interface DashboardProps {
   data: AppState;

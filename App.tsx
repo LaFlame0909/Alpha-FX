@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, BookOpen, Wallet, Activity, Moon, Sun, BarChart3, Compass } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Wallet, Moon, Sun, BarChart3, Compass } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { TradeLog } from './components/TradeLog';
 import { Accounting } from './components/Accounting';
@@ -142,7 +142,7 @@ const App = () => {
             {activeTab === 'dashboard' && <Dashboard data={data} />}
             {activeTab === 'log' && <TradeLog trades={data.trades} onDelete={handleDeleteTrade} onEdit={handleEditTrade} onAddClick={() => setIsModalOpen(true)} />}
             {activeTab === 'accounting' && <Accounting transactions={data.accounting} onUpdate={refreshData} />}
-            {activeTab === 'resources' && <Resources currentBalance={stats.balance} />}
+            {activeTab === 'resources' && <Resources />}
         </div>
       </main>
 
