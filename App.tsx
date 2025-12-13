@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LayoutDashboard, BookOpen, Wallet, BrainCircuit, Activity, Moon, Sun } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { TradeLog } from './components/TradeLog';

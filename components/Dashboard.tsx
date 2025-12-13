@@ -294,8 +294,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                             dataKey="value"
                             stroke="none"
                         >
-                            {winLossData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={5} />
+                            {winLossData.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
                         <Tooltip contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-text)' }} />
