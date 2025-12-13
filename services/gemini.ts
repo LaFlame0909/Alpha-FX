@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Trade } from "../types";
 
 const getAIClient = () => {
-  const apiKey = localStorage.getItem('ALPHA_GEMINI_KEY');
+  const apiKey = process.env.API_KEY;
   if (!apiKey) throw new Error("API_KEY_MISSING");
   return new GoogleGenAI({ apiKey });
 };
@@ -16,7 +16,7 @@ export const getStrategyTagSuggestion = async (notes: string): Promise<string> =
     });
     return response.text?.trim() || "Unknown";
   } catch (error: any) {
-    if (error.message === 'API_KEY_MISSING') return "Set API Key";
+    if (error.message === 'API_KEY_MISSING') return "Set API Key in env";
     console.error("Gemini Error:", error);
     return "Error";
   }
@@ -32,9 +32,22 @@ export const getMarketBriefing = async (): Promise<string> => {
         tools: [{ googleSearch: {} }]
       }
     });
-    return response.text || "Unable to fetch news.";
+    
+    let text = response.text || "Unable to fetch news.";
+    // Extract grounding sources as per guidelines
+    if (response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+        const sources = response.candidates[0].groundingMetadata.groundingChunks
+            .map((c: any) => c.web?.uri)
+            .filter((u: any) => u);
+            
+        if (sources.length > 0) {
+            text += "\n\n**Sources:**\n" + sources.map((s: string) => `- ${s}`).join("\n");
+        }
+    }
+    return text;
+
   } catch (error: any) {
-    if (error.message === 'API_KEY_MISSING') return "⚠️ Please set your Gemini API Key in Settings to use this feature.";
+    if (error.message === 'API_KEY_MISSING') return "⚠️ API Key missing. Please configure process.env.API_KEY.";
     console.error("Gemini Error:", error);
     return "Error retrieving market news.";
   }
@@ -61,7 +74,7 @@ export const analyzeTradeImage = async (base64Image: string): Promise<string> =>
     });
     return response.text || "No analysis generated.";
   } catch (error: any) {
-    if (error.message === 'API_KEY_MISSING') return "⚠️ Please set your Gemini API Key in Settings to analyze images.";
+    if (error.message === 'API_KEY_MISSING') return "⚠️ API Key missing. Please configure process.env.API_KEY.";
     console.error("Gemini Vision Error:", error);
     return "Error analyzing chart image.";
   }
@@ -87,7 +100,7 @@ export const chatWithCoach = async (message: string, contextTrades: Trade[]): Pr
     });
     return response.text || "I couldn't generate a response.";
   } catch (error: any) {
-    if (error.message === 'API_KEY_MISSING') return "⚠️ Please set your Google Gemini API Key in the Settings menu (top right gear icon) to enable the AI Coach.";
+    if (error.message === 'API_KEY_MISSING') return "⚠️ API Key missing. Please configure process.env.API_KEY.";
     console.error("Gemini Chat Error:", error);
     return "I'm having trouble connecting to the coaching server.";
   }
@@ -110,7 +123,7 @@ export const analyzePsychology = async (entry: string, recentTrades: Trade[]): P
         });
         return response.text || "Analysis failed.";
       } catch (error: any) {
-        if (error.message === 'API_KEY_MISSING') return "⚠️ Please set your Gemini API Key in Settings.";
+        if (error.message === 'API_KEY_MISSING') return "⚠️ API Key missing. Please configure process.env.API_KEY.";
         console.error("Gemini Psycho Error:", error);
         return "Error analyzing psychology.";
       }

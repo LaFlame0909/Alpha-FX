@@ -305,17 +305,18 @@ export const AICoach: React.FC<AICoachProps> = ({ trades }) => {
                                     }`}>
                                         {msg.role === 'ai' && <div className="flex items-center gap-2 mb-2 text-bb-accent font-bold text-xs uppercase"><Brain size={12} /> Coach</div>}
                                         {msg.role === 'ai' ? (
-                                            <ReactMarkdown 
-                                                className="markdown-content"
-                                                components={{
-                                                    ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                                                    li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                                                    strong: ({node, ...props}) => <strong className="text-bb-accent font-bold" {...props} />,
-                                                    h3: ({node, ...props}) => <h3 className="text-sm font-bold text-bb-text mt-3 mb-1 uppercase" {...props} />
-                                                }}
-                                            >
-                                                {msg.content}
-                                            </ReactMarkdown>
+                                            <div className="markdown-content">
+                                                <ReactMarkdown 
+                                                    components={{
+                                                        ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                                                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                                                        strong: ({node, ...props}) => <strong className="text-bb-accent font-bold" {...props} />,
+                                                        h3: ({node, ...props}) => <h3 className="text-sm font-bold text-bb-text mt-3 mb-1 uppercase" {...props} />
+                                                    }}
+                                                >
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
                                         ) : (
                                             <div className="whitespace-pre-wrap">{msg.content}</div>
                                         )}
