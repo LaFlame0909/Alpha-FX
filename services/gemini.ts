@@ -3,7 +3,10 @@ import { Trade } from "../types";
 
 const getAIClient = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API_KEY_MISSING");
+  if (!apiKey) {
+    console.error("❌ process.env.API_KEY is not set. Ensure you have an .env file with API_KEY=your_key_here");
+    throw new Error("API_KEY_MISSING");
+  }
   return new GoogleGenAI({ apiKey });
 };
 

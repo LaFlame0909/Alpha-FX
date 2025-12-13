@@ -14,7 +14,7 @@ interface Message {
     type?: 'text' | 'image';
 }
 
-const PatternCard = ({ name, type, desc, children }: { name: string, type: string, desc: string, children: React.ReactNode }) => (
+const PatternCard = ({ name, type, desc, children }: { name: string, type: string, desc: string, children?: React.ReactNode }) => (
     <div className="bg-bb-card border border-bb-border rounded-xl p-4 flex flex-col gap-3 hover:border-bb-accent/50 transition group h-full shadow-sm">
         <div className="h-28 bg-bb-bg rounded-lg flex items-center justify-center border border-bb-border relative overflow-hidden group-hover:bg-bb-bg/50 transition-colors">
             {children}
