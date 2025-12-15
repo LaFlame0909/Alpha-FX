@@ -111,7 +111,7 @@ export const Accounting: React.FC<AccountingProps> = ({ transactions, onUpdate }
 
       <div className="md:col-span-2 bg-bb-card p-6 rounded-2xl border border-bb-border flex flex-col h-[600px] shadow-sm">
         <h3 className="font-bold mb-4 text-bb-text text-lg">Transaction History</h3>
-        <div className="overflow-y-auto flex-1 pr-2">
+        <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-bb-muted uppercase border-b border-bb-border bg-bb-bg/50 sticky top-0 backdrop-blur-sm">
               <tr>

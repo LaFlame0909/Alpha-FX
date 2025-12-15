@@ -48,8 +48,13 @@ const CalendarWidget = ({ trades }: { trades: Trade[] }) => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
     
-    // Helper to get formatted date string
-    const getDateStr = (d: Date) => d.toISOString().slice(0, 10);
+    // Helper to get formatted date string (Local YYYY-MM-DD)
+    const getDateStr = (d: Date) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
 
     // 1. Generate the grid days (always 6 weeks = 42 days for consistency)
     const calendarDays = useMemo(() => {

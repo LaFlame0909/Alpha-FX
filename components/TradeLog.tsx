@@ -35,7 +35,7 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
       </div>
 
       <div className="bg-bb-card border border-bb-border rounded-xl overflow-hidden flex-1 shadow-sm flex flex-col">
-        <div className="overflow-x-auto overflow-y-auto flex-1">
+        <div className="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead className="bg-bb-bg/50 text-xs text-bb-muted sticky top-0 backdrop-blur-sm z-10 border-b border-bb-border">
               <tr>
@@ -102,7 +102,7 @@ export const TradeLog: React.FC<TradeLogProps> = ({ trades, onDelete, onEdit, on
                         </td>
                         <td className="p-4"><span className="bg-bb-bg text-bb-text px-2 py-1 rounded text-xs border border-bb-border">{t.strategy}</span></td>
                         <td className="p-4 text-right text-bb-muted font-mono">${t.risk}</td>
-                        <td className={`p-4 text-right font-bold font-mono ${t.pl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        <td className={`p-4 text-right font-bold font-mono ${t.pl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {t.pl >= 0 ? '+' : ''}{t.pl}
                         </td>
                         <td className="p-4 text-right font-mono text-xs text-bb-muted">{r}R</td>

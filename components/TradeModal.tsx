@@ -20,10 +20,18 @@ const CHECKLIST_ITEMS = [
 ];
 
 export const TradeModal: React.FC<TradeModalProps> = ({ onClose, onSave, initialData }) => {
+  // Use local time for default date
+  const getDefaultDate = () => {
+    const now = new Date();
+    // Offset to get local ISO-like string
+    const local = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    return local.toISOString().slice(0, 16);
+  };
+
   const [formData, setFormData] = useState({
       pair: '',
       direction: 'Long',
-      date: new Date().toISOString().slice(0, 16),
+      date: getDefaultDate(),
       strategy: '',
       risk: '',
       pl: '',
